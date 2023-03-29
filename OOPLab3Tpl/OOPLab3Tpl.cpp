@@ -10,6 +10,8 @@
 #include "Lab3Example.h"
 int main()
 {
+
+    setlocale(LC_CTYPE, "ukr");
     std::cout << " Lab #3  !\n";
 //  Код виконання завдань
 //  Головне меню завдань
