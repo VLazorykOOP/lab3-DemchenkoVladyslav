@@ -68,7 +68,8 @@ int mainExample1()
 	cout << "Конструктор з параметрами (5, 5, blue):" << endl;
 	a = Rectangle(5, 5, "blue");
 	a.Show();
-	cout << "Сеттери (замінити ширину на -5 (значення не зміниться), висоту на 6.5 та колір на \"green\") та виведення за допомогою ґеттерів:" << endl;
+	cout <<
+		"Сеттери (замінити ширину на -5 (значення не зміниться), висоту на 6.5 та колір на \"green\") та виведення за допомогою ґеттерів:" << endl;
 	a.SetWidth(-5);
 	a.SetHeigth(6.5);
 	a.SetColor("green");
@@ -88,20 +89,26 @@ public:
 		state = OK;
 		size = 1;
 		vec = new double[1] {0};
+		count++;
 	}   // 	 конструктор без параметрів
 	Vec(int c) {
 		state = OK;
 		size = c;
 		vec = new double [c] {0};
+		count++;
 	}
 	Vec(int c, double n)
 	{
 		state = OK;
 		size = c;
-		vec = new double [c] {n};
+		vec = new double[c];
+		for (int i = 0; i < size; i++)
+		{
+			vec[i] = n;
+		}
+		count++;
 	}
-	Vec(double ix, double iy);
-	Vec(double* v);
+	Vec(int a, double* v);
 	~Vec() {
 		count--;
 		if (vec != NULL)
@@ -149,6 +156,7 @@ public:
 		if (abs1 > abs2)return 1;
 		if (abs1 < abs2)return -1;
 	}
+	Vec& operator=(const Vec&);
 };
 Vec::Vec(const Vec& s) {
 	//if (this == &s) return; //  // the expression is used in the old standard
@@ -159,6 +167,7 @@ Vec::Vec(const Vec& s) {
 	{
 		vec[i] = s.vec[i];
 	}
+	count++;
 };
 void Vec::Output() {
 	for (int i = 0; i < size; i++)
@@ -213,7 +222,6 @@ Vec Vec::Mul(double d) {
 	return tmp;
 }
 Vec& Vec::operator=(const Vec& s) {
-
 	if (size != s.size)
 	{
 		if (vec) delete[] vec;
@@ -245,70 +253,30 @@ bool operator<=(Vec& s1, Vec& s2) {
 
 	return s1.Compare(s2) < 1;
 }
-int mainExample3()
+int Vec::count = 0;
+int mainExample2()
 {
-#if !defined(CODING_VS_CODE)
-	cout << "Тестування створенного класу \n";
-	cout << "Тестування конструкторiв \n";
-#else 
-	cout << "Testing create class  \n";
-	cout << "Testing crot's  \n";
-#endif
-	Vec ObjCDef;
-	ObjCDef.Output();
-	Vec ObjP1(10.0);
-	ObjP1.Output();
-	double  a = 1.0, b = 2.0;
-	Vec  ObjP2(a, b);
-	ObjP2.Output();
-	Vec ObjCopy(ObjP2);
-	double* v = nullptr, v2[] = { 1.2, 3.3 };
-	Vec  ObjP3(v2);
-	if (ObjP3.getState() != OK) cout << " ObjP3  x= 0  y= 0  \n";
-	Vec  ObjP4(v2);
-	if (ObjP4.getState() != OK) cout << " ObjP4 x= 0  y= 0  \n";
-#if !defined(CODING_VS_CODE)
-	cout << " Кiлькiсть створених об'єктiв Vec " << Vec::getCount() << endl;
-	cout << "Тестування введення \n";
-	ObjCDef.Input();
-	cout << "Тестування функцiй \n";
-	ObjCDef = ObjCDef.Add(ObjP2);
-	ObjCDef.Output();
-	cout << " \n Кiлькiсть створених об'єктiв Vec до Sub " << Vec::getCount() << endl;
-	ObjCDef = ObjCDef.Sub(ObjP2);
-	cout << " \n Кiлькiсть створених об'єктiв Vec пiсля Sub " << Vec::getCount() << endl;
-#else 
-	cout << "Testing input \n";
-	ObjCDef.Input();
-	cout << "Testing gunction \n";
-	ObjCDef = ObjCDef.Add(ObjP2);
-	ObjCDef.Output();
-	cout << " \n sizes create objects Vec before  Sub " << Vec::getCount() << endl;
-	ObjCDef = ObjCDef.Sub(ObjP2);
-	cout << " \n  sizes create objects Vec after Sub  " << Vec::getCount() << endl;
-#endif
+	cout << "Creating first Vec" << endl;
+	Vec vec1 = Vec();
+	cout << endl << "Current Vec objects: " << vec1.getCount() << endl;
+	cout << endl << "Creating second Vec with 5" << endl;
+	Vec vec2 = Vec(5);
+	vec2.Output();
+	cout << endl << "Current Vec objects: " << vec1.getCount() << endl;
+	cout << "Creating third Vec with size 5 and filling it with 1" << endl;
+	Vec vec3 = Vec(5, 1);
+	vec3.Output();
+	cout << endl << "Current Vec objects: " << vec1.getCount() << endl;
+	cout << "Creating fourth Vec as copy of vec3" << endl;
+	Vec vec4 = Vec(vec3);
+	vec4.Output();
+	cout << endl << "Current Vec objects: " << vec1.getCount() << endl;
+	cout << endl << "Comparing vec3 and vec4" << endl << vec3.Compare(vec4) << endl;
+	cout << endl << "Comparing vec1 and vec4" << endl << vec1.Compare(vec4) << endl;
 
-	ObjCDef.Output();
-	ObjCDef = ObjCDef.Mul(5);
-	ObjCDef.Output();
-	ObjCDef = ObjCDef.Div(1.3);
-	if (ObjCDef.getState() == STATE::BAD_DIV) cout << "BAD_DIV \n";
-	ObjCDef.Output();
-
-	ObjCDef = ObjCDef.Div(0.0);
-	if (ObjCDef.getState() == STATE::BAD_DIV) cout << "BAD_DIV \n";
-	ObjCDef.Output();
-	cout << "ObjCopy state " << ObjCopy.getState() << endl;
-	if (ObjCopy.CompLessAll(ObjCDef))  cout << "ObjCopy less ObjDef  " << endl;
-
-
-#if !defined(CODING_VS_CODE)
-	cout << "Завершення  тестування  \n";
-#else 
-	cout << "Completion of testing  \n";
-#endif
-	return 1;
-
+	cout << endl << "Comparing vec3 and vec4 with operator ==" << endl << (vec3 == vec4) << endl;
+	cout << endl << "Comparing vec1 and vec4 with operator <" << endl << (vec1 < vec4) << endl;
+	return 0;
 }
 /*example  4
 Створити тип даних - клас вектор, який має вказівник на ComplexDouble, число елементів і змінну стану. У класі визначити
