@@ -23,9 +23,9 @@ public: Rectangle()
 }
 	  Rectangle(double a, double b, string c)
 	  {
-		  width = a;
-		  heigth = b;
-		  color = c;
+		  SetWidth(a);
+		 SetHeigth(b);
+		  SetColor(c);
 	  }
 	  void SetWidth(double a)
 	  {
@@ -92,10 +92,14 @@ public:
 		count++;
 	}   // 	 конструктор без параметрів
 	Vec(int c) {
-		state = OK;
-		size = c;
-		vec = new double [c] {0};
-		count++;
+		if (c > 0)
+		{
+			state = OK;
+			size = c;
+			vec = new double [c] {0};
+			count++;
+		}
+		else state = BAD_INIT;
 	}
 	Vec(int c, double n)
 	{
@@ -123,13 +127,30 @@ public:
 	Vec Div(double d);
 	void Input();   //  !!! Без первантаження операцій    
 	void Output();  //  !!! Без первантаження операцій
-	bool CompLessAll(Vec& s);
 	static int getCount() {
 		if (count <= 0) cout << " Немає об'єктів Vec ";
 		return count;
 	}
 	int getState() { return state; }
-
+	int GetAt(int i)
+	{
+		if (i > -1 && i < size)
+			return vec[i];
+		else
+		{
+			state = BAD_INIT;
+			return vec[0];
+		}
+	}
+	void SetAt(int i, double value)
+	{
+		if (i > -1 && i < size)
+			vec[i] = value;
+		else
+		{
+			state = BAD_INIT;
+		}
+	}
 	bool Equals(const Vec& s)
 	{
 		if (size != s.size)return false;
@@ -201,25 +222,23 @@ Vec Vec::Sub(Vec& s) {
 	}
 }
 Vec Vec::Div(double d) {
-	Vec tmp;
-	if (fabs(d) < 1.e-25) {
-		tmp.state = BAD_DIV;
+	if (d == 0) {
+		this->state = BAD_DIV;
 		cout << " Error div \n";
 		return *this;
 	}
 	for (int i = 0; i < size; i++)
 	{
-		tmp.vec[i] = vec[i] / d;
+		this->vec[i] /= d;
 	}
-	return tmp;
+	return *this;
 }
 Vec Vec::Mul(double d) {
-	Vec tmp = Vec(*this);
 	for (int i = 0; i < size; i++)
 	{
-		tmp.vec[i] = vec[i] * d;
+		this->vec[i] *= d;
 	}
-	return tmp;
+	return *this;
 }
 Vec& Vec::operator=(const Vec& s) {
 	if (size != s.size)
@@ -232,6 +251,14 @@ Vec& Vec::operator=(const Vec& s) {
 	for (int i = 0; i < size; i++)
 		vec[i] = s.vec[i];
 	return *this;
+}
+void Vec::Input()
+{
+	cout << "Input " << size << " elements of vector" << endl;
+	for (int i = 0; i < size; i++)
+	{
+		cin >> vec[i];
+	}
 }
 bool operator==(Vec& s1, Vec& s2) {
 
@@ -258,9 +285,11 @@ int mainExample2()
 {
 	cout << "Creating first Vec" << endl;
 	Vec vec1 = Vec();
+	vec1.Output();
 	cout << endl << "Current Vec objects: " << vec1.getCount() << endl;
-	cout << endl << "Creating second Vec with 5" << endl;
+	cout << endl << "Creating second Vec with size 5 and input from console" << endl;
 	Vec vec2 = Vec(5);
+	vec2.Input();
 	vec2.Output();
 	cout << endl << "Current Vec objects: " << vec1.getCount() << endl;
 	cout << "Creating third Vec with size 5 and filling it with 1" << endl;
@@ -273,9 +302,17 @@ int mainExample2()
 	cout << endl << "Current Vec objects: " << vec1.getCount() << endl;
 	cout << endl << "Comparing vec3 and vec4" << endl << vec3.Compare(vec4) << endl;
 	cout << endl << "Comparing vec1 and vec4" << endl << vec1.Compare(vec4) << endl;
-
 	cout << endl << "Comparing vec3 and vec4 with operator ==" << endl << (vec3 == vec4) << endl;
 	cout << endl << "Comparing vec1 and vec4 with operator <" << endl << (vec1 < vec4) << endl;
+	cout << "Creating fifth Vec with negative size" << endl;
+	Vec vec5 = Vec(-3);
+	vec5.Output();
+	cout << endl << "Multiplying vec3 on 4" << endl;
+	vec3.Mul(4).Output();
+	cout << endl << "Dividing vec3 on 4" << endl;
+	vec3.Div(4).Output();
+	cout << endl << "Dividing vec3 on 0" << endl;
+	vec3.Div(0).Output();
 	return 0;
 }
 /*example  4
