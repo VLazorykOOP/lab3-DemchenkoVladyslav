@@ -79,20 +79,33 @@ int mainExample1()
 }
 class Vec
 {
-	double  x, y;
+	double* vec;
 	int state;
+	int size;
 	static int count;
 public:
-	Vec() : x(0), y(0) {
-		state = OK; count++;
+	Vec() {
+		state = OK;
+		size = 1;
+		vec = new double[1] {0};
 	}   // 	 конструктор без параметрів
-	Vec(double iv) : x(iv), y(iv) {
-		state = OK; count++;
+	Vec(int c) {
+		state = OK;
+		size = c;
+		vec = new double [c] {0};
+	}
+	Vec(int c, double n)
+	{
+		state = OK;
+		size = c;
+		vec = new double [c] {n};
 	}
 	Vec(double ix, double iy);
 	Vec(double* v);
 	~Vec() {
 		count--;
+		if (vec != NULL)
+			delete[]vec;
 		cout << " state Vec " << state;
 		cout << " Vec delete \n";
 	}
@@ -109,48 +122,74 @@ public:
 		return count;
 	}
 	int getState() { return state; }
+
+	bool Equals(const Vec& s)
+	{
+		if (size != s.size)return false;
+		for (int i = 0; i < size; i++)
+		{
+			if (vec[i] != s.vec[i])return false;
+		}
+		return true;
+	}
+	int Compare(const Vec& s)
+	{
+		if (size != s.size)
+		{
+			if (size > s.size)return 1;
+			return -1;
+		}
+		double abs1 = 0, abs2 = 0;
+		for (int i = 0; i < size; i++)
+		{
+			abs1 += (vec[i] * vec[i]);
+			abs2 += (s.vec[i] * s.vec[i]);
+		}
+		if (abs1 == abs2)return 0;
+		if (abs1 > abs2)return 1;
+		if (abs1 < abs2)return -1;
+	}
 };
-int Vec::count = 0;
-Vec::Vec(double ix, double iy) {
-	x = ix; y = iy;
-	state = OK;
-	count++;
-}
 Vec::Vec(const Vec& s) {
 	//if (this == &s) return; //  // the expression is used in the old standard
-	x = s.x; y = s.y; state = OK;
-	count++;
+	state = OK;
+	size = s.size;
+	vec = new double[size];
+	for (int i = 0; i < size; i++)
+	{
+		vec[i] = s.vec[i];
+	}
 };
-Vec::Vec(double* v) {
-	if (v == nullptr) {
-		state = BAD_INIT; x = 0; y = 0;
-	}
-	else {
-		x = v[0]; y = v[1];
-		state = OK;
-	}
-	count++;
-}
-void Vec::Input() {
-	cout << " Input  x y ";
-	cin >> x >> y;
-}
 void Vec::Output() {
-	cout << " x =" << x << " y = " << y << " state  " << state << endl;
+	for (int i = 0; i < size; i++)
+	{
+		cout << vec[i] << " ";
+	}
+	cout << endl << "State: " << state;
 }
 
 Vec Vec::Add(Vec& s) {
-	Vec tmp;
-	tmp.x = x + s.x;
-	tmp.y = y + s.y;
-	return tmp;
+	if (s.size == size)
+	{
+		Vec tmp = Vec(size);
+		for (int i = 0; i < size; i++)
+		{
+			tmp.vec[i] = vec[i] + s.vec[i];
+		}
+		return tmp;
+	}
 }
 
 Vec Vec::Sub(Vec& s) {
-	Vec tmp;
-	tmp.x = x - s.x;
-	tmp.y = y - s.y;
-	return tmp;
+	if (s.size == size)
+	{
+		Vec tmp = Vec(size);
+		for (int i = 0; i < size; i++)
+		{
+			tmp.vec[i] = vec[i] - s.vec[i];
+		}
+		return tmp;
+	}
 }
 Vec Vec::Div(double d) {
 	Vec tmp;
@@ -159,21 +198,52 @@ Vec Vec::Div(double d) {
 		cout << " Error div \n";
 		return *this;
 	}
-	tmp.x = x / d;
-	tmp.y = y / d;
+	for (int i = 0; i < size; i++)
+	{
+		tmp.vec[i] = vec[i] / d;
+	}
 	return tmp;
 }
 Vec Vec::Mul(double d) {
-	Vec tmp;
-	tmp.x = x * d;
-	tmp.y = y * d;
+	Vec tmp = Vec(*this);
+	for (int i = 0; i < size; i++)
+	{
+		tmp.vec[i] = vec[i] * d;
+	}
 	return tmp;
 }
+Vec& Vec::operator=(const Vec& s) {
 
-bool Vec::CompLessAll(Vec& s) {
+	if (size != s.size)
+	{
+		if (vec) delete[] vec;
+		size = s.size;
+		vec = new double[size];
+		state = 0;
+	}
+	for (int i = 0; i < size; i++)
+		vec[i] = s.vec[i];
+	return *this;
+}
+bool operator==(Vec& s1, Vec& s2) {
 
-	if (x < s.x && y < s.y) return true;
-	return false;
+	return s1.Equals(s2);
+}
+bool operator>(Vec& s1, Vec& s2) {
+
+	return s1.Compare(s2) == 1;
+}
+bool operator<(Vec& s1, Vec& s2) {
+
+	return s1.Compare(s2) == -1;
+}
+bool operator>=(Vec& s1, Vec& s2) {
+
+	return s1.Compare(s2) > -1;
+}
+bool operator<=(Vec& s1, Vec& s2) {
+
+	return s1.Compare(s2) < 1;
 }
 int mainExample3()
 {
@@ -213,9 +283,9 @@ int mainExample3()
 	cout << "Testing gunction \n";
 	ObjCDef = ObjCDef.Add(ObjP2);
 	ObjCDef.Output();
-	cout << " \n Counts create objects Vec before  Sub " << Vec::getCount() << endl;
+	cout << " \n sizes create objects Vec before  Sub " << Vec::getCount() << endl;
 	ObjCDef = ObjCDef.Sub(ObjP2);
-	cout << " \n  Counts create objects Vec after Sub  " << Vec::getCount() << endl;
+	cout << " \n  sizes create objects Vec after Sub  " << Vec::getCount() << endl;
 #endif
 
 	ObjCDef.Output();
